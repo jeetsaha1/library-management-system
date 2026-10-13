@@ -1,46 +1,81 @@
-services:
-  mongo:
-    image: mongo:8
-    restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "mongosh",
-          "--quiet",
-          "--username",
-          "${MONGO_USER}",
-          "--password",
-          "${MONGO_PASSWORD}",
-          "--authenticationDatabase",
-          "admin",
-          "--eval",
-          "db.adminCommand('ping').ok"
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+# services:
+#   mongo:
+#     image: mongo:8
+#     restart: unless-stopped
+#     environment:
+#       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+#       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+#     ports:
+#       - "27017:27017"
+#     volumes:
+#       - mongo_data:/data/db
+#     healthcheck:
+#       test:
+#         [
+#           "CMD",
+#           "mongosh",
+#           "--quiet",
+#           "--username",
+#           "${MONGO_USER}",
+#           "--password",
+#           "${MONGO_PASSWORD}",
+#           "--authenticationDatabase",
+#           "admin",
+#           "--eval",
+#           "db.adminCommand('ping').ok"
+#         ]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 5
 
+#   server:
+#     build: ./server
+#     restart: unless-stopped
+#     environment:
+#       PORT: 5000
+#       MONGODB_URI: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongo:27017/libtrack?authSource=admin
+#       JWT_SECRET: ${JWT_SECRET}
+#       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+#     ports:
+#       - "5000:5000"
+#     depends_on:
+#       mongo:
+#         condition: service_healthy
+#     volumes:
+#       - ./server:/app
+#       - server_node_modules:/app/node_modules
+
+#   client:
+#     build: ./client
+#     restart: unless-stopped
+#     ports:
+#       - "5173:5173"
+#     depends_on:
+#       - server
+#     volumes:
+#       - ./client:/app
+#       - client_node_modules:/app/node_modules
+
+# volumes:
+#   mongo_data:
+#   server_node_modules:
+#   client_node_modules:
+
+
+
+
+
+services:
   server:
     build: ./server
     restart: unless-stopped
     environment:
       PORT: 5000
-      MONGODB_URI: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongo:27017/libtrack?authSource=admin
+      MONGODB_URI: ${MONGODB_URI}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
     ports:
       - "5000:5000"
-    depends_on:
-      mongo:
-        condition: service_healthy
     volumes:
       - ./server:/app
       - server_node_modules:/app/node_modules
@@ -57,6 +92,5 @@ services:
       - client_node_modules:/app/node_modules
 
 volumes:
-  mongo_data:
   server_node_modules:
   client_node_modules:
