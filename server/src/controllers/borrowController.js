@@ -25,15 +25,36 @@ function sendError(res, status, message) {
 
 // POST /api/borrow/issue
 export async function issueBook(req, res) {
-  const userId = getUserId(req);
-  const { bookId } = req.body;
+  const currentUserId = getUserId(req);
+  const isStaff = getStaffRole(req);
+  const { bookId, memberId, memberEmail } = req.body;
 
-  if (!userId) {
+  if (!currentUserId) {
     return sendError(res, 401, "Please log in first");
   }
 
   if (!mongoose.isValidObjectId(bookId)) {
     return sendError(res, 400, "A valid bookId is required");
+  }
+
+  // Determine the target user who is receiving the book
+  let targetUserId = currentUserId;
+
+  if (isStaff && (memberId || memberEmail)) {
+    if (memberId) {
+      if (!mongoose.isValidObjectId(memberId)) {
+        return sendError(res, 400, "Invalid member ID");
+      }
+      targetUserId = memberId;
+    } else if (memberEmail) {
+      const foundUser = await mongoose.model("User").findOne({
+        email: memberEmail.trim().toLowerCase(),
+      });
+      if (!foundUser) {
+        return sendError(res, 404, `No member found with email "${memberEmail}"`);
+      }
+      targetUserId = foundUser._id;
+    }
   }
 
   const session = await mongoose.startSession();
@@ -62,7 +83,7 @@ export async function issueBook(req, res) {
 
       const records = await BorrowRecord.create(
         [{
-          user: userId,
+          user: targetUserId,
           book: bookId,
           issueDate,
           dueDate,
