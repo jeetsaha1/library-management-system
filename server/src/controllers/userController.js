@@ -1,4 +1,3 @@
-
 import User from "../models/User.js";
 
 export async function createLibrarian(req, res, next) {
@@ -79,6 +78,29 @@ export async function getLibrarians(req, res, next) {
         email: librarian.email,
         role: librarian.role,
         createdAt: librarian.createdAt,
+      })),
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getMembers(req, res, next) {
+  try {
+    const members = await User.find({ role: "member" })
+      .select("name email role createdAt")
+      .sort({ name: 1 })
+      .lean();
+
+    return res.status(200).json({
+      success: true,
+      count: members.length,
+      members: members.map((member) => ({
+        id: member._id.toString(),
+        name: member.name,
+        email: member.email,
+        role: member.role,
+        createdAt: member.createdAt,
       })),
     });
   } catch (error) {

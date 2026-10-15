@@ -1,8 +1,8 @@
-
 import { Router } from "express";
 import {
   createLibrarian,
   getLibrarians,
+  getMembers,
 } from "../controllers/userController.js";
 import {
   protect,
@@ -25,6 +25,14 @@ router.get(
   protect,
   authorize("admin"),
   getLibrarians
+);
+
+// Librarians and admins can view registered members (for book issuing)
+router.get(
+  "/members",
+  protect,
+  authorize("admin", "librarian"),
+  getMembers
 );
 
 export default router;

@@ -3,6 +3,8 @@ import express from "express";
 import authRoutes from "./routes/authRoutes.js";
 import borrowRoutes from "./routes/borrowRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import bookRoutes from "./routes/bookRoutes.js";
+import requestRoutes from "./routes/requestRoutes.js";
 
 const app = express();
 
@@ -47,6 +49,8 @@ app.get("/api/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/borrow", borrowRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/books", bookRoutes);
+app.use("/api/requests", requestRoutes);
 
 // Handle malformed JSON and unexpected server errors.
 app.use((err, req, res, next) => {
